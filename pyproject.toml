@@ -1,0 +1,8 @@
+[project]
+name = "kit"
+version = "0.1.0"
+description = "git wrapper"
+dependencies = []
+
+[project.scripts]
+kit = "kit.main:cli" 
