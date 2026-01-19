@@ -16,7 +16,7 @@ Kit adalah wrapper Git berbasis Python yang dirancang untuk mempercepat manajeme
     Rich
 
 
-### Commands tersedia:
+### Command tersedia:
 
 * `kit gs`: Menampilkan status repositori saat ini dengan format teks berwarna (Git Status).
 * `kit gaa`: Menambahkan seluruh perubahan file yang ada di direktori ke dalam staging area (Git Add All).
@@ -45,9 +45,9 @@ cd kit
 ```
 
 
-3. Install dependensi:
+3. Install library:
 ```bash
-pip install -r requirements.txt
+pip install -e .
 
 ```
 
