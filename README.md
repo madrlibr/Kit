@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="100" height="100" alt="1000190465" src="https://github.com/user-attachments/assets/580eb395-0852-488a-8b8c-2a23b7ac4a7e" />
+</p>
+
 
 # Kit: Git CLI Wrapper
 
