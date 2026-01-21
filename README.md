@@ -72,7 +72,8 @@ kit iap URL_REPO
 
 
 ## Footage:
-<img width="1920" height="1080" alt="Screenshot (1189)" src="https://github.com/user-attachments/assets/5440c863-5a8e-450f-8bdb-f96186a761fa" />
+![Demo Video](https://github.com/user-attachments/assets/d5a0a70d-af0c-4713-baae-255dfc77ffc6.gif)
+
 
 
 
