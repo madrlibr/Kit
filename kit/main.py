@@ -1,42 +1,99 @@
 from git import Repo, exc
 from rich.console import Console
-import shutil
+
 
 cs = Console()
-repo_path = './'   
+repo_path = "./"
+
 try:
     repo = Repo(repo_path)
-except:
-    repo = None 
+except exc.InvalidGitRepositoryError:
+    repo = None
 
-def is_gpg_available():
-    return shutil.which('gpg') is not None
+
+def can_sign_commit(repo):
+    try:
+        repo.git.commit(
+            "--allow-empty",
+            "-S",
+            "-m",
+            "gpg-sign-test"
+        )
+        repo.git.reset("--hard", "HEAD~1")
+        return True
+    except Exception as e:
+        cs.print(f"[red]GPG signing tidak tersedia:[/red] {e}")
+        return False
+
+
+def commit(message, require_gpg=False):
+    if require_gpg:
+        if not can_sign_commit(repo):
+            raise RuntimeError("GPG diperlukan tapi tidak bisa digunakan")
+
+    try:
+        repo.git.commit("-S", "-m", message)
+        cs.print("[bold green]Commit dibuat dengan signature GPG[/bold green]")
+        return "signed"
+    except Exception as e:
+        cs.print(f"[yellow]Commit signed gagal:[/yellow] {e}")
+
+        repo.git.commit("--no-gpg-sign", "-m", message)
+        cs.print("[bold yellow]Commit dibuat TANPA signature[/bold yellow]")
+        return "unsigned"
 
 
 def git_status():
-    output = repo.git.status()
-    cs.print(f"[bold gray]{output}[/bold gray]")
+    cs.print(f"[gray]{repo.git.status()}[/gray]")
 
 
 def git_add_all():
-    try:
-        repo.git.add(all=True) 
-        cs.print("[bold green]Add . berhasil[/bold green]")
-    except Exception as e:
-        cs.print(f"[bold red]Terjadi kesalahan: {e}[bold red]")
-    
+    repo.git.add(all=True)
+    cs.print("[green]Add . berhasil[/green]")
 
-def git_commit(message):
+
+def git_pull():
+    origin = repo.remotes.origin
+    origin.pull()
+    cs.print("[green]Pull berhasil[/green]")
+
+
+def git_push(branch="main"):
+    origin = repo.remotes.origin
+    origin.push(branch)
+    cs.print(f"[green]Push ke {branch} berhasil[/green]")
+
+
+def add_commit_push(message, require_gpg=False):
+    git_add_all()
+    commit(message, require_gpg=require_gpg)
+    git_push("main")
+
+
+def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False):
+    global repo
+
     try:
-        if is_gpg_available():
-            repo.git.commit('-S', '-m', message)
-            cs.print("[bold green]Commit berhasil (Verified)![/bold green]")
-        else:
-            raise Exception("GPG not found")
+        repo = Repo.init(repo_path)
+        cs.print("[green]Repository di-init[/green]")
     except Exception:
-        repo.git.commit('-m', message)
-        cs.print("[bold yellow]GPG tidak tersedia/gagal. Commit berhasil (Unverified).[/bold yellow]")
+        repo = Repo(repo_path)
+        cs.print("[blue]Repo sudah ada[/blue]")
 
+    repo.git.add(all=True)
+    commit(commit_message, require_gpg=require_gpg)
+
+    repo.git.branch("-M", "main")
+
+    try:
+        origin = repo.create_remote("origin", remote_url)
+    except exc.GitCommandError:
+        origin = repo.remote("origin")
+        with origin.config_writer as cw:
+            cw.set("url", remote_url)
+
+    origin.push("--set-upstream", "origin", "main")
+    cs.print("[green]Push awal selesai[/green]")
 
 def remote_url():
     try:
@@ -44,86 +101,8 @@ def remote_url():
     except Exception as e:
         cs.print(f"[bold red]Terjadi kesalahan: {e}[bold red]")
 
-
-def git_pull():
-    origin = repo.remotes.origin
-    output = origin.pull()
-    print(output)
-    cs.print("[bold green]Pull berhasil[/bold green]")
-
-
-def git_push_main(message):
-    cs.print("[bold yellow]Add all...[/bold yellow]")
-    repo.git.add(all=True) 
-    cs.print("[bold green]Add . berhasil[/bold green]")
-    
-    cs.print("[bold yellow]Committing...[/bold yellow]")
-    try:
-        repo.git.commit('-S', '-m', message)
-        cs.print("[bold green]Commit Verified berhasil![/bold green]")
-    except Exception:
-        repo.git.commit('-m', message)
-        cs.print("[bold yellow]Commit Unverified berhasil![/bold yellow]")
-
-    cs.print("[bold yellow]Pushing...[/bold yellow]")
-    origin = repo.remotes.origin
-    origin.push('main')
-    cs.print("[bold green]Push ke main berhasil![/bold green]")
-
-
 def current_branch():
     print(repo.active_branch.name)
 
-
 def changes_diff():
     print(repo.git.diff(None))
-
-
-def push_all_main(message):
-    cs.print("[bold yellow]Add all...[/bold yellow]")
-    repo.git.add(all=True) 
-    
-    cs.print("[bold yellow]Committing...[/bold yellow]")
-    try:
-        repo.git.commit('-S', '-m', message)
-        cs.print("[bold green]Commit Verified berhasil![/bold green]")
-    except Exception:
-        cs.print("[bold red]GPG gagal, mencoba commit tanpa signature...[/bold red]")
-        repo.git.commit('--no-gpg-sign', '-m', message)
-        cs.print("[bold yellow]Commit Unverified berhasil (GPG dilewati).[/bold yellow]")
-
-
-def initi_and_push(remote_url, repo_path='./', commit_message="First commit"):
-    cs.print("[bold yellow]Init dan push....[/bold yellow]") 
-    try:
-        local_repo = Repo.init(repo_path)
-        cs.print("[bold green]Init berhasil[/bold green]")
-    except Exception:
-        local_repo = Repo(repo_path)
-        cs.print("[bold blue]Repo sudah ada, menggunakan repo yang tersedia[/bold blue]")
-
-    local_repo.git.add(all=True)
-    
-    try:
-        local_repo.git.commit('-S', '-m', commit_message)
-        cs.print(f"[bold green]Commit Verified: {commit_message}[/bold green]")
-    except:
-        local_repo.git.commit('-m', commit_message) # Tadi kamu tulis 'm', harusnya '-m'
-        cs.print(f"[bold yellow]Commit Unverified: {commit_message}[/bold yellow]")
-
-    local_repo.git.branch('-M', 'main')
-
-    try:
-        origin = local_repo.create_remote('origin', remote_url)
-    except exc.GitCommandError:
-        origin = local_repo.remote(name='origin')
-        with origin.config_writer as cw:
-            cw.set("url", remote_url)
-    
-    cs.print(f"[bold yellow]Remote URL: {remote_url}[/bold yellow]")
-
-    try:
-        local_repo.git.push('--set-upstream', 'origin', 'main')
-        cs.print("[bold green]Push berhasil![/bold green]")
-    except Exception as e:
-        cs.print(f"[bold red]Gagal push: {e}[/bold red]")
