@@ -27,7 +27,7 @@ Kit adalah wrapper Git berbasis Python yang dirancang untuk mempercepat manajeme
 * `kit gc <pesan>`: Melakukan commit untuk perubahan yang telah di-staging dengan pesan tertentu (Git Commit).
 * `kit gp`: Melakukan penarikan data terbaru dari remote repositori (Git Pull).
 * `kit gpm`: Mengunggah perubahan yang telah di-commit langsung ke branch utama (Git Push Main).
-* `kit pam <pesan>`: Menjalankan alur kerja otomatis: Add all, Commit, dan Push ke branch main sekaligus.
+* `kit acp <pesan>`: Menjalankan alur kerja otomatis: Add all, Commit, dan Push ke branch main sekaligus.
 * `kit iap <url_remote>`: Melakukan inisialisasi repositori baru, setting remote, dan push pertama kali ke main.
 * `kit ru`: Menampilkan alamat URL remote origin yang terhubung dengan repositori.
 * `kit cb`: Menampilkan nama branch yang sedang aktif saat ini.
