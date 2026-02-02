@@ -60,7 +60,7 @@ pip install -e .
 
 Otomatisasi Push ke Main:
 ```bash
-kit pam "memperbaiki bug"
+kit acp "memperbaiki bug"
 
 ```
 
