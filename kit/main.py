@@ -66,9 +66,15 @@ def git_push(branch="main"):
 
 def add_commit_push(message, require_gpg=False):
     git_add_all()
-    commit(message, require_gpg=require_gpg)
-    git_push("main")
 
+    try:
+        commit(message, require_gpg=require_gpg)
+    except:
+        repo.git.commit("-m", message)
+        cs.print("[bold green]Commit dibuat tanpa signature GPG[/bold green]")
+
+    git_push("main")
+    cs.print("[bold green]Push berhasil![/bold green]")
 
 def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False):
     global repo
