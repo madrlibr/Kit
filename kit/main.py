@@ -1,6 +1,8 @@
 from git import Repo, exc
 from rich.console import Console
-
+from rich.panel import Panel
+from rich.text import Text
+import pyfiglet
 
 cs = Console()
 repo_path = "./"
@@ -48,35 +50,46 @@ def git_status():
 
 
 def git_add_all():
-    repo.git.add(all=True)
-    cs.print("[green]Add . berhasil[/green]")
-
+    try:
+        repo.git.add(all=True)
+        cs.print("[green]Add . berhasil[/green]")
+    except:
+        cs.print("[bold red]Terjadi kesalahan![/bold red]")
 
 def git_pull():
-    origin = repo.remotes.origin
-    origin.pull()
-    cs.print("[green]Pull berhasil[/green]")
-
+    try:
+        origin = repo.remotes.origin
+        origin.pull()
+        cs.print("[green]Pull berhasil[/green]")
+    except:
+        cs.print("[bold red]Terjadi kesalahan![/bold red]")
 
 def git_push(branch="main"):
-    origin = repo.remotes.origin
-    origin.push(branch)
-    cs.print(f"[green]Push ke {branch} berhasil[/green]")
-
-
-def add_commit_push(message, require_gpg=False):
-    git_add_all()
-
     try:
-        commit(message, require_gpg=require_gpg)
+        origin = repo.remotes.origin
+        origin.push(branch)
+        cs.print(f"[green]Push ke {branch} berhasil[/green]")
     except:
+        cs.print("[bold red]Terjadi kesalahan![/bold red]")
+def remote_url():
+    try:
+        cs.print(f"[bold yellow]{repo.remotes.origin.url}[/bold yellow]")  
+    except Exception as e:
+        cs.print(f"[bold red]Terjadi kesalahan: {e}[bold red]")
+
+def add_commit_push(message):
+    try:
+        git_add_all()
         repo.git.commit("-m", message)
-        cs.print("[bold green]Commit dibuat tanpa signature GPG[/bold green]")
+        cs.print("[bold green]Commit dibuat!")
+        git_push("main")
+        cs.print("[bold yellow]Pushing...[/bold yellow]")
+        cs.print("[bold green]Push berhasil![/bold green]")
+        remote_url() 
+    except:
+        cs.print("[bold red]Terjadi kesalahan![/bold red]")
 
-    git_push("main")
-    cs.print("[bold green]Push berhasil![/bold green]")
-
-def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False):
+def init_and_push(remote_url, message="Initial commit", require_gpg=False):
     global repo
 
     try:
@@ -87,8 +100,7 @@ def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False
         cs.print("[blue]Repo sudah ada[/blue]")
 
     repo.git.add(all=True)
-    commit(commit_message, require_gpg=require_gpg)
-
+    repo.git.commit("-m", message)
     repo.git.branch("-M", "main")
 
     try:
@@ -100,15 +112,24 @@ def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False
 
     origin.push("--set-upstream", "origin", "main")
     cs.print("[green]Push awal selesai[/green]")
-
-def remote_url():
-    try:
-        cs.print(f"[bold yellow]{repo.remotes.origin.url}[/bold yellow]")  
-    except Exception as e:
-        cs.print(f"[bold red]Terjadi kesalahan: {e}[bold red]")
+    cs.print(f"[bold yellow]{remote_url}[/bold yellow]")
 
 def current_branch():
     print(repo.active_branch.name)
 
 def changes_diff():
     print(repo.git.diff(None))
+
+def inform():
+    ascii = pyfiglet.figlet_format("KIT", font="slant") 
+    styled = Text(ascii, style="bold green")
+
+    cs.print("Welcome to KIT", style="white")
+    cs.print(styled)
+    cs.print("Deskripsi", justify="center", style="dim")
+
+    description = (
+        "Kit adalah library CLI untuk mempermudah dan mempersingkat perintah git\n"
+        "Perintah yang tersedia: gp|acp|gm|gaa|ru|cb|cd|gs|iap"
+    )
+    cs.print(Panel(description, border_style="bright_black"))

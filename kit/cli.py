@@ -3,7 +3,7 @@ from .main import *
 
 def main():
     if len(sys.argv) < 2:
-        print("Penggunaan: kit [gp|gpm|gs|gaa|gc|ru|cb|cd|gs]")
+        inform()
         return
 
     command = sys.argv[1].lower()
@@ -29,4 +29,4 @@ def main():
         init_and_push(remote_url=command2)
     else:
         print(f"Error: Perintah '{command}' tidak dikenal.")
-        print("Perintah yang tersedia: [gp|gpm|gs|gaa|gc|ru|cb|cd|gs]")
+        print("Perintah yang tersedia: gp|acp|gm|gaa|ru|cb|cd|gs|iap")
