@@ -18,10 +18,9 @@ def can_sign_commit(repo):
         repo.git.commit(
             "--allow-empty",
             "-S",
-            "-m",
-            "gpg-sign-test"
+            "-m"
         )
-        repo.git.reset("--hard", "HEAD~1")
+        git.reset("--hard", "HEAD~1")
         return True
     except Exception as e:
         cs.print(f"[red]GPG signing tidak tersedia:[/red] {e}")
@@ -71,6 +70,7 @@ def git_push(branch="main"):
         cs.print(f"[green]Push ke {branch} berhasil[/green]")
     except:
         cs.print("[bold red]Terjadi kesalahan![/bold red]")
+
 def remote_url():
     try:
         cs.print(f"[bold yellow]{repo.remotes.origin.url}[/bold yellow]")  
@@ -89,30 +89,33 @@ def add_commit_push(message):
     except:
         cs.print("[bold red]Terjadi kesalahan![/bold red]")
 
-def init_and_push(remote_url, message="Initial commit", require_gpg=False):
-    global repo
 
+def init_and_push(remote_url, message="Initial commit", require_gpg=False, repo_path=repo_path):
+    cs.print("[bold yellow]Init dan push....[/bold yellow]")
+    
     try:
         repo = Repo.init(repo_path)
-        cs.print("[green]Repository di-init[/green]")
+        cs.print("[bold green]Init berhasil[/bold green]")
     except Exception:
         repo = Repo(repo_path)
-        cs.print("[blue]Repo sudah ada[/blue]")
+        cs.print("[bold blue]Repo sudah ada, menggunakan repo yang tersedia[/bold blue]")
 
     repo.git.add(all=True)
-    repo.git.commit("-m", message)
-    repo.git.branch("-M", "main")
+    cs.print("[bold green]Add . berhasil[/bold green]")
+    
+    commit = repo.index.commit(commit_message)
+    cs.print(f"[bold green]Commit berhasil: {commit.hexsha[:7]}\nPesan commit: {commit_message}[/bold green]")
+
+    repo.git.branch('-M', 'main')
 
     try:
-        origin = repo.create_remote("origin", remote_url)
+        origin = repo.create_remote('origin', remote_url)
     except exc.GitCommandError:
-        origin = repo.remote("origin")
+        origin = repo.remote(name='origin')
         with origin.config_writer as cw:
             cw.set("url", remote_url)
-
-    origin.push("--set-upstream", "origin", "main")
-    cs.print("[green]Push awal selesai[/green]")
-    cs.print(f"[bold yellow]{remote_url}[/bold yellow]")
+    
+    cs.print(f"[bold yellow]Remote URL: {remote_url}[/bold yellow]") 
 
 def current_branch():
     print(repo.active_branch.name)
