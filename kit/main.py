@@ -90,7 +90,7 @@ def add_commit_push(message):
         cs.print("[bold red]Terjadi kesalahan![/bold red]")
 
 
-def init_and_push(remote_url, message="Initial commit", require_gpg=False, repo_path=repo_path):
+def init_and_push(remote_url, commit_message="Initial commit", require_gpg=False, repo_path=repo_path):
     cs.print("[bold yellow]Init dan push....[/bold yellow]")
     
     try:
